@@ -1,15 +1,21 @@
-# While the Docker images themselves are supported for production usage,
-# this docker-compose.yaml is designed to be used by developers to run
-# an environment locally. It is not designed to be used in production.
-# We recommend to use Kubernetes in production with our Helm Charts:
-# https://docs.camunda.io/docs/self-managed/platform-deployment/kubernetes-helm/
-# For local development, we recommend using KIND instead of `docker-compose`:
-# https://docs.camunda.io/docs/self-managed/platform-deployment/helm-kubernetes/guides/local-kubernetes-cluster/
-
-# This is a lightweight configuration with Zeebe, Operate, Tasklist, and Elasticsearch
-# See docker-compose.yml for a configuration that also includes Optimize, Identity, and Keycloak.
-
 services:
+  mongodb:
+    image: mongo:6.0.5
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    environment:
+       - MONGO_INITDB_DATABASE=test
+       - MONGO_INITDB_ROOT_USERNAME=admin
+       - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      # seeding scripts
+       - ./mongo-entrypoint:/docker-entrypoint-initdb.d
+       # named volumes
+#       - mongodb:/data/db
+#       - mongoconfig:/data/configdb
+    networks:
+       - cluster-network
 
   zeebe: # https://docs.camunda.io/docs/self-managed/platform-deployment/docker/#zeebe
     image: camunda/zeebe:8.2.4
@@ -36,7 +42,7 @@ services:
     volumes:
       - zeebe:/usr/local/zeebe/data
     networks:
-      - camunda-platform
+      - cluster-network
     depends_on:
       - elasticsearch
 
@@ -58,7 +64,7 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - camunda-platform
+      - cluster-network
     depends_on:
       - zeebe
       - elasticsearch
@@ -89,11 +95,11 @@ services:
     volumes:
       - elastic:/usr/share/elasticsearch/data
     networks:
-      - camunda-platform
+      - cluster-network
 
 volumes:
   zeebe:
   elastic:
 
 networks:
-  camunda-platform:
+  cluster-network:
