@@ -1,0 +1,29 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.7.11'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
+
+group = 'com.saga'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'io.camunda:zeebe-client-java:1.2.6'
+	implementation 'org.springframework.boot:spring-boot-starter-json'
+	implementation 'javax.validation:validation-api:2.0.1.Final'
+
+	compileOnly "org.projectlombok:lombok:1.18.22"
+	annotationProcessor "org.projectlombok:lombok:1.18.22"
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
