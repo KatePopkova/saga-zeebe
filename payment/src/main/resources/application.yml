@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: payment-service
+  data:
+    mongodb:
+      uri: mongodb://127.0.0.1:27017/admin
+zeebe:
+  client:
+    worker:
+      defaultName: payment-products
+    security.plaintext: true
+    broker:
+      gateway-address: localhost:26500

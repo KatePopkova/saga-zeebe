@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: order-service
+  data:
+    mongodb:
+      uri: mongodb://127.0.0.1:27017/admin
+
+zeebe:
+  client:
+    broker:
+      gateway-address: localhost:26500
+
+bpmn-processes:
+  process: "order-product"
