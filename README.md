@@ -1,6 +1,6 @@
 # Saga code example on Camunda Platform 8
 This project contains:
-1. infrastructure (Camunda Platform 8, ElasticSearch, MongoDB) 
+1. infrastructure (Camunda Platform 8, ElasticSearch, MongoDB), 
 2. API for making an order (order service),
 3. worker apps (inventory service, payment service).
 
