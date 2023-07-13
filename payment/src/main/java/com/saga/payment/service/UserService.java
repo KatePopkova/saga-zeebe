@@ -20,9 +20,4 @@ public class UserService {
         user.setBalance(user.getBalance() - productValue);
         return userRepository.save(user);
     }
-
-    public User increaseUserBalance(User user, Integer productValue) {
-        user.setBalance(user.getBalance() + productValue);
-        return userRepository.save(user);
-    }
 }

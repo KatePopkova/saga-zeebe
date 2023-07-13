@@ -35,8 +35,6 @@ public class PaymentService {
 
     public ZeebeRequest cancelProductPaying(ZeebeRequest zeebeRequest) {
         orderService.updateOrderStatus(zeebeRequest.getCreatedOrderId(), PaymentStatus.REJECTED);
-      //  User user = userService.findUser(zeebeRequest.getUserId()).get();
-       // userService.increaseUserBalance(user, zeebeRequest.getPrice() * zeebeRequest.getProductCount());
         zeebeRequest.setOrderStatus(PaymentStatus.REJECTED.toString());
         return zeebeRequest;
     }
