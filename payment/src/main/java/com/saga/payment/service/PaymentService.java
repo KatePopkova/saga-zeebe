@@ -21,8 +21,8 @@ public class PaymentService {
             Integer productValue = zeebeRequest.getPrice() * zeebeRequest.getProductCount();
             if (user.getBalance() >= productValue) {
                 userService.decreaseUserBalance(user, productValue);
-                orderService.updateOrderStatus(zeebeRequest.getCreatedOrderId(), PaymentStatus.COMPLETED);
-                zeebeRequest.setOrderStatus(PaymentStatus.COMPLETED.toString());
+                orderService.updateOrderStatus(zeebeRequest.getId(), PaymentStatus.RESERVED);
+                zeebeRequest.setOrderStatus(PaymentStatus.RESERVED.toString());
             } else {
                 throw new BusinessException("User does not have enough money for buying the product.");
             }
@@ -34,7 +34,7 @@ public class PaymentService {
     }
 
     public ZeebeRequest cancelProductPaying(ZeebeRequest zeebeRequest) {
-        orderService.updateOrderStatus(zeebeRequest.getCreatedOrderId(), PaymentStatus.REJECTED);
+        orderService.updateOrderStatus(zeebeRequest.getId(), PaymentStatus.REJECTED);
         zeebeRequest.setOrderStatus(PaymentStatus.REJECTED.toString());
         return zeebeRequest;
     }

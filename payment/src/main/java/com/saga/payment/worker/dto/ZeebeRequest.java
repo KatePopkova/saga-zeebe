@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ZeebeRequest {
-    private String createdOrderId;
+    private String id;
     private Integer userId;
     private Integer productId;
     private Integer price;

@@ -3,8 +3,10 @@ package com.saga.order.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saga.order.controller.dto.OrderRequest;
+import com.saga.order.enumerated.OrderStatus;
+import com.saga.order.repository.OrderRepository;
 import com.saga.order.repository.entity.Order;
-import com.saga.order.service.dto.ZeebeOrderRequest;
+import io.camunda.zeebe.client.api.response.ProcessInstanceResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,26 +16,33 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderProductService {
     private final ZeebeService zeebeService;
-    private final OrderService orderService;
+    private final OrderRepository orderRepository;
     private final ObjectMapper objectMapper;
 
     public Order createOrder(OrderRequest orderRequest) throws JsonProcessingException {
-        Order order = orderService.saveOrder(orderRequest);
-
-        ZeebeOrderRequest zeebeOrderRequest = ZeebeOrderRequest.builder()
-                .createdOrderId(order.getId())
-                .userId(order.getUserId())
-                .productId(order.getProductId())
-                .price(order.getPrice())
+        Order order = Order.builder()
+                .userId(orderRequest.getUserId())
+                .productId(orderRequest.getProductId())
+                .price(orderRequest.getPrice())
                 .productCount(orderRequest.getProductCount())
-                .orderStatus(order.getOrderStatus())
+                .orderStatus(OrderStatus.CREATED.toString())
                 .build();
 
-        zeebeService.start(objectMapper.writeValueAsString(zeebeOrderRequest));
-        return order;
+        orderRepository.save(order);
+        String variablesResult = zeebeService.start(order).getVariables();
+        String orderStatus  = objectMapper.readValue(variablesResult, Order.class).getOrderStatus();
+
+        if(orderStatus.equals(OrderStatus.RESERVED.toString())) {
+            order.setOrderStatus(OrderStatus.COMPLETED.toString());
+        }
+        if(orderStatus.equals(OrderStatus.REJECTED.toString())) {
+            order.setOrderStatus(OrderStatus.CANCELLED.toString());
+        }
+
+        return orderRepository.save(order);
     }
 
     public List<Order> getOrders() {
-        return orderService.findAllOrders();
+        return orderRepository.findAll();
     }
 }

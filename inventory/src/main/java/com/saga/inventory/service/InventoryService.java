@@ -21,7 +21,7 @@ public class InventoryService {
             Product product = productService.findProductByProductId(zeebeRequest.getProductId()).get();
             if(product.getProductCount() > requestedProductCount) {
                 productService.decreaseProductCount(product, requestedProductCount);
-                orderService.updateOrderStatus(zeebeRequest.getCreatedOrderId(), InventoryStatus.RESERVED);
+                orderService.updateOrderStatus(zeebeRequest.getId(), InventoryStatus.RESERVED);
                 zeebeRequest.setOrderStatus(InventoryStatus.RESERVED.toString());
             } else {
                 throw new BusinessException("Not enough products are available for ordering.");
@@ -33,19 +33,22 @@ public class InventoryService {
     }
 
     public ZeebeRequest cancelProductBooking(ZeebeRequest zeebeRequest) {
-        if (zeebeRequest.getOrderStatus().equals(InventoryStatus.CREATED.toString())) {
-            updateOrderStatus(zeebeRequest, InventoryStatus.REJECTED);
-        }
-        if (zeebeRequest.getOrderStatus().equals(InventoryStatus.REJECTED.toString())){
+        String orderStatus = zeebeRequest.getOrderStatus();
+
+        if (orderStatus.equals(InventoryStatus.REJECTED.toString())) {
             Product product = productService.findProductByProductId(zeebeRequest.getProductId()).get();
             productService.increaseProductCount(product, zeebeRequest.getProductCount());
+            updateOrderStatus(zeebeRequest, InventoryStatus.REJECTED);
+        }
+
+        if (orderStatus.equals(InventoryStatus.CREATED.toString())) {
             updateOrderStatus(zeebeRequest, InventoryStatus.REJECTED);
         }
         return zeebeRequest;
     }
 
     private void updateOrderStatus(ZeebeRequest zeebeRequest, InventoryStatus status) {
-        orderService.updateOrderStatus(zeebeRequest.getCreatedOrderId(), status);
+        orderService.updateOrderStatus(zeebeRequest.getId(), status);
         zeebeRequest.setOrderStatus(status.toString());
     }
 }
